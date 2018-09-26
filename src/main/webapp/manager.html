@@ -1,0 +1,265 @@
+<style>
+
+.axis .domain {
+  display: none;
+}
+
+.card{
+	display:inline;
+}
+
+</style>
+
+<div>
+<div class="row">
+	<div class="col-sm-2"></div>
+	<div class="col-sm-10"><h2 style="margin-top:30px;margin-bottom:30px">Hello Manager: <span id="name"></span></h2></div>
+</div>
+
+<div class="row">
+  	<div class="col-sm-2">
+		<button style="margin-left:15px" type="button" class="btn btn-outline-secondary btn-block" onclick = "listEmployees()">Employees</button>
+		<button style="margin-left:15px" type="button" class="btn btn-outline-secondary btn-block" onclick = "listPending()">Pending</button>
+		<button style="margin-left:15px" type="button" class="btn btn-outline-secondary btn-block" onclick = "listResolved()">Resolved</button>
+		<button style="margin-left:15px" type="button" class="btn btn-outline-secondary btn-block" onclick = "doGetManager(&quot;/ERS/Logout.do&quot;)">Log Out</button><br>
+	</div>
+  	<div class="col-sm-5">
+		<p id="reply"></p> 
+	</div>
+	<div class="col-sm-5">
+		<p id="display"></p> 
+	</div>
+</div>
+
+
+
+
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>
+
+function listEmployees(){
+	let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {           
+        	obj = JSON.parse(this.responseText);
+        	console.log(obj);
+           reply = document.getElementById("reply");
+           reply.innerHTML = "";
+           for(let i = 0; i < obj.length; i++){
+        	   let card = `
+        		   <div class="card" style="float:left;width:235px;margin-right:15px;margin-bottom:15px">
+        		   <div class="card-body">
+        		     <h4 class="card-title">`+obj[i].fname+` `+obj[i].lname+`</h4>
+        		     <p class="card-text">Employee ID: `+obj[i].e_id+`</p>
+        		     <button class="btn btn-default btn-block" onclick="displayPending(` +obj[i].e_id+ `)">View Pending</button>
+        		   </div>
+        		 </div>`
+        		 reply.innerHTML = reply.innerHTML + card;
+        	}
+        }
+    };
+    xhttp.open("get","/ERS/ListEmployees.do", true);
+    xhttp.send();
+}
+
+function listResolved(){
+	let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) { 
+        	document.getElementById("display").innerHTML = "";
+        	reply = document.getElementById("reply");
+        	if(this.responseText == "["){
+        		reply.innerHTML = "No Resolved Reimbursements";
+        		
+        	}else{
+        		document.getElementById("display").innerHTML = "";
+            	obj = JSON.parse(this.responseText);
+            	console.log(obj);
+               
+               reply.innerHTML = "";
+               for(let i = 0; i < obj.length; i++){
+            	   if(obj[i].approved == "true"){
+            		   let card = `
+                		   <div class="card" style="float:left;width:235px;margin-right:15px;margin-bottom:15px">
+            			   <img class="card-img-top" src="`+obj[i].r_id+`.image" alt="Card image cap">
+            		   		<div class="card-body">
+                		     <h4 class="card-title">Request #`+obj[i].r_id+`</h4>
+                		     <p class="card-text">Requested by employee: `+obj[i].e_id+`</p>
+                		     <p class="card-text">Approved by manager: `+obj[i].m_id+`</p>
+                		     <p class="card-text">Amount: `+obj[i].amount+`</p>
+                		     <p class="card-text">Memo: `+obj[i].memo+`</p>
+                		   </div>
+                		 </div>`
+                		 reply.innerHTML = reply.innerHTML + card;
+            	   }else{
+            		   let card = `
+                		   <div class="card" style="float:left;width:235px;margin-right:15px;margin-bottom:15px">
+            			   <img class="card-img-top" src="`+obj[i].r_id+`.image" alt="Card image cap">
+            		   		<div class="card-body">
+                		     <h4 class="card-title">Request #`+obj[i].r_id+`</h4>
+                		     <p class="card-text">Requested by employee: `+obj[i].e_id+`</p>
+                		     <p class="card-text">Denied by manager: `+obj[i].m_id+`</p>
+                		     <p class="card-text">Amount: `+obj[i].amount+`</p>
+                		     <p class="card-text">Memo: `+obj[i].memo+`</p>
+                		   </div>
+                		 </div>`
+                		reply.innerHTML = reply.innerHTML + card;
+            	   }  
+            	}
+        	}        	
+        }
+    };
+    xhttp.open("get","/ERS/ResolvedRequest.do", true);
+    xhttp.send();
+}
+
+function listPending(){
+	let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {     
+        	document.getElementById("display").innerHTML = "";
+        	
+        	//console.log(this.responseText);
+        	
+        	obj = JSON.parse(this.responseText);
+        	
+           reply = document.getElementById("reply");
+           reply.innerHTML = "";
+           for(let i = 0; i < obj.length; i++){
+       		   let card = `
+           		   <div class="card" style="float:left;width:235px;margin-right:15px;margin-bottom:15px">
+    			   <img class="card-img-top" src="`+obj[i].r_id+`.image" alt="Card image cap">
+       		   		<div class="card-body">
+           		     <h4 class="card-title">Request #`+obj[i].r_id+`</h4>
+           		     <p class="card-text">Requested by employee: `+obj[i].e_id+`</p>
+           		     <p class="card-text">Memo: `+obj[i].memo+`</p>
+           		  	 <p class="card-text">Amount: `+obj[i].amount+`</p>
+           		  	<button class="btn btn btn-outline-success btn-block" onclick="approve(` +obj[i].r_id+ `)">Approve</button>
+           		  	<button class="btn btn btn-outline-danger btn-block" onclick="deny(` +obj[i].r_id+ `)">Deny</button>
+           		   </div>
+           		 </div>`
+           		 reply.innerHTML = reply.innerHTML + card;
+        	} 
+        }
+    };
+    xhttp.open("get","/ERS/PendingRequests.do", true);
+    xhttp.send();
+}
+
+
+
+function getManagerName(){
+	let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+           document.getElementById("name").innerHTML = this.responseText;
+        }
+    };
+    xhttp.open("get","/ERS/getName.do", true);
+    //xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    //xhttp.send("name=Jimmy"); 
+    xhttp.send();
+}
+
+window.onload = getManagerName();
+
+function doGetManager(doString){
+    let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+               document.getElementById("reply").innerHTML = this.responseText;
+               document.getElementById("display").innerHTML = "";
+           	}else if(this.readyState == 4 && this.status == 201){
+           		load_nextPage('login');
+           	}
+        };
+        xhttp.open("get",doString, true);
+        //xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        //xhttp.send("name=Jimmy"); 
+        xhttp.send();
+}  
+
+
+function approve(id){
+	 let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+        	listPending();
+       }
+    };
+    xhttp.open("post","/ERS/approve.do", true);
+    xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xhttp.send("id="+String(id)+"&approved=1");
+}
+
+function deny(id){
+	//console.log(e_id);
+	 let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+        	listPending();
+        }
+    };
+    xhttp.open("post","/ERS/deny.do", true);
+    xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xhttp.send("id="+String(id)+"&approved=0");
+}
+
+function displayPending(e_id){
+	console.log(e_id);
+	 let xhttp = new XMLHttpRequest();
+     xhttp.onreadystatechange = function() {
+         if (this.readyState == 4 && this.status == 200) {
+        	display = document.getElementById("display");
+        	display.innerHTML = "";
+         	if(this.responseText == "["){
+         		display.innerHTML = "No Pending Reimbursements"
+         	}else{
+         		obj = JSON.parse(this.responseText);
+                display.innerHTML = "";
+                for(let i = 0; i < obj.length; i++){
+           		   let card = `
+               		   <div class="card" style="float:left;width:225px;margin-right:15px;margin-bottom:15px">
+        			   <img class="card-img-top" src="`+obj[i].r_id+`.image" alt="Card image cap">
+           		   		<div class="card-body">
+               		     <h4 class="card-title">Request #`+obj[i].r_id+`</h4>
+               		     <p class="card-text">From employee: `+obj[i].e_id+`</p>
+               		     <p class="card-text">Memo: `+obj[i].memo+`</p>
+               		  	 <p class="card-text">Amount: `+obj[i].amount+`</p>
+               		  	<button class="btn btn btn-outline-success btn-block" onclick="approve(` +obj[i].r_id+ `)">Approve</button>
+               		  	<button class="btn btn btn-outline-danger btn-block" onclick="deny(` +obj[i].r_id+ `)">Deny</button>
+               		   </div>
+               		 </div>`
+               		 display.innerHTML = display.innerHTML + card;
+             	} 
+         	}
+         }
+         
+		};
+     
+     xhttp.open("post","/ERS/EmployeePendingRequests.do", true);
+     xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+     xhttp.send("id="+String(e_id));
+}
+
+function getJSONInfo(){
+	console.log(e_id);
+	let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+			return JSON.parse(this.responseText);
+      	}
+    };
+    xhttp.open("get","/ERS/getjsoninfo.do", true);
+    xhttp.send();
+	
+}
+
+
+
+
+
+
+</script>
+</div>

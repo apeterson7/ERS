@@ -1,0 +1,50 @@
+<html>
+<head>
+</head>
+<body>
+<img src="/ERS/getImage.do">
+
+<img src="" id="imgsample">
+
+<h3>A demonstration of how to access a File Upload Button</h3>
+
+<input type="file" id="myFile">
+
+<p>Click the "Try it" button to disable the file upload button.</p>
+
+<button id="btn" onclick="sendFile()">Try it</button>
+
+<p id="reply"></p>
+
+<script>
+s = document.getElementById("myFile");
+s.onchange = ()=>{changeImg();};
+
+function sendFile() {
+	var formData = new FormData();
+	let file =  document.getElementById("myFile").files[0];
+	console.log(typeof file);
+	formData.append("image", file);
+	//formData.append("string","hello");
+	
+	let xhr = new XMLHttpRequest();
+	
+	xhr.open("post","/ERS/putImage.do", true);
+	xhr.send(formData);
+}
+
+
+function changeImg() {
+	let f = document.getElementById("myFile").files[0];
+    let freader = new FileReader();
+    let pic = document.getElementById("imgsample");
+    pic.file = f;
+    console.log(typeof pic.file)
+    freader.onload = (function(img){return function (e) {img.src = e.target.result;};})(pic);
+    freader.readAsDataURL(f);
+}
+
+</script>
+
+</body>
+</html>

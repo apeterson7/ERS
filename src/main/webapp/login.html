@@ -1,0 +1,74 @@
+<div>
+
+<div class="row">
+  <div class="col-sm-2"></div>
+  <div class="col-sm-4">
+  	<h2 style="margin-top:30px;margin-bottom:30px">Login</h2>
+	
+	<form>
+	  <div class="input-group">
+	    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+	    <input id="username" type="text" class="form-control" name="email" placeholder="username">
+	  </div><br>
+	  <div class="input-group">
+	    <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+	    <input id="password" type="password" class="form-control" name="password" placeholder="Password">
+	  </div>
+	</form>
+	
+	<button type="button" class="btn btn-default" id="submit" onclick="login()">Submit</button>
+	<p id="msg"></p>
+	</div>
+  <div class="col-sm-6"></div>
+</div>
+
+
+
+<script>
+
+var input = document.getElementById("password");
+input.addEventListener("keyup", function(event) {
+    event.preventDefault();
+    if (event.keyCode === 13) {
+        document.getElementById("submit").click();
+    }
+});
+
+var input = document.getElementById("username");
+input.addEventListener("keyup", function(event) {
+    event.preventDefault();
+    if (event.keyCode === 13) {
+        document.getElementById("submit").click();
+    }
+});
+
+function login(){
+	console.log("here");
+	
+	
+    let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+        	console.log(this.status);
+            if (this.readyState == 4 && this.status == 201) {
+            	load_nextPage("manager");
+           	}else if(this.readyState == 4 && this.status == 202){
+           		load_nextPage("employee");
+           	}else if(this.readyState == 4 && this.status == 203){
+           		document.getElementById("msg").innerHTML = "Invalid Login";
+           	}
+        };
+        xhttp.open("post","/ERS/Login.do", true);
+        xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        //xhttp.send("name=Jimmy"); 
+        
+        let username = document.getElementById("username").value;
+		let password = document.getElementById("password").value;
+		console.log(username);
+		console.log(password);
+		
+        xhttp.send("username="+username+"&password="+password);
+    }
+    
+    //Manager Function
+</script>
+</div>
